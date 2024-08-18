@@ -1,6 +1,5 @@
 <?php
 header("content-type:text/javascript;charset=utf-8");
-date_default_timezone_set("Asia/Bangkok");
 error_reporting(0);
 error_reporting(E_ERROR | E_PARSE);
 require_once('db.conf.php');
@@ -22,29 +21,28 @@ if (!$link->set_charset("utf8")) {
 if (isset($_GET)) {
 	if ($_GET['isAdd'] == 'true') {
 				
+		$docId = $_GET['docId'];
 		$ca = $_GET['ca'];
+		$pea_on = $_GET['pea_on'];
+		$image_name = $_GET['image_name'];
+		$image_date = $_GET['image_date'];
+		$user_id = $_GET['user_id'];
+		
+		
+							
+		$sql = "INSERT INTO `tb_beforwmmr`(`id`, `docId`, `ca`, `pea_on`, `image_name`, `image_date`, `user_id`) VALUES (Null,'$docId','$ca','$pea_on','$image_name','$image_date','$user_id')";
 
 
-		$result = mysqli_query($link, "SELECT *, date(timestamp) FROM tb_saveFileBeforDmsx WHERE `ca` = $ca and date(timestamp) = curdate() ");
+		$result = mysqli_query($link, $sql);
 
 		if ($result) {
+			echo "true";
+		} else {
+			echo "false";
+		}
 
-			while($row=mysqli_fetch_assoc($result)){
-			$output[]=$row;
-
-			}	// while
-
-			echo json_encode($output);
-
-		} //if
-
-	} else echo "Welcome Sino";	
-
-	// if2
+	} else echo "Welcome Sino";
    
-   
-}	// if1
-
-
+}
 	mysqli_close($link);
 ?>

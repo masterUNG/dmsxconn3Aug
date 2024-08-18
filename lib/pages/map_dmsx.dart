@@ -153,7 +153,7 @@ class _MapdmsxState extends State<Mapdmsx> {
         lngDirection = double.parse(dmsxmodel.lng.trim());
 
         if (dmsxModels[indexDirection].image_befor_wmmr.isEmpty) {
-          takePhotoSpecial();
+          // takePhotoSpecial();
         }
 
         showDirction = true;
@@ -492,7 +492,7 @@ class _MapdmsxState extends State<Mapdmsx> {
                     ),
                     Text(
                       'รอดำเนินการ',
-                      style: TextStyle(fontSize: 6),
+                      style: TextStyle(fontSize: 6),textScaleFactor: 1.0,
                     ),
                   ],
                 ),
@@ -596,24 +596,19 @@ class _MapdmsxState extends State<Mapdmsx> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
+                ShowText(text: 'สาย: ${dmsxModels[indexDirection].line}'),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    ShowText(text: 'สาย: ${dmsxModels[indexDirection].line}'),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ShowText(text: 'ca: ${dmsxModels[indexDirection].ca}'),
-                        WidgetIconButton(
-                          iconData: Icons.copy,
-                          pressFunc: () {
-                            Clipboard.setData(ClipboardData(
-                                text: dmsxModels[indexDirection].ca));
-                            print('copy success');
-                          },
-                        )
-                      ],
-                    ),
+                    ShowText(text: 'ca: ${dmsxModels[indexDirection].ca}'),
+                    WidgetIconButton(
+                      iconData: Icons.copy,
+                      pressFunc: () {
+                        Clipboard.setData(
+                            ClipboardData(text: dmsxModels[indexDirection].ca));
+                        print('copy success');
+                      },
+                    )
                   ],
                 ),
                 SizedBox(width: 20),
@@ -831,45 +826,72 @@ class _MapdmsxState extends State<Mapdmsx> {
                                   firstButton: WidgetTextButton(
                                     label: 'ถ่ายภาพ',
                                     pressFunc: () async {
-                                      var result =
-                                          await ImagePicker().pickImage(
-                                        source: ImageSource.camera,
-                                        maxWidth: 800,
-                                        maxHeight: 800,
-                                      );
+                                      navigator.pop();
 
-                                      if (result != null) {
-                                        File file = File(result.path);
+                                      var perCamera =
+                                          await Permission.camera.status;
 
-                                        String urlUpload =
-                                            'https://pea23.com/apipsinsx/saveFileBeforDmsx.php';
-                                        String nameFile =
-                                            '${dmsxModels[indexDirection].ca}_${dmsxModels[indexDirection].dataStatus}.jpg';
-                                        Map<String, dynamic> map = {};
-                                        map['file'] =
-                                            await dio.MultipartFile.fromFile(
-                                                file.path,
-                                                filename: nameFile);
-                                        dio.FormData formData =
-                                            dio.FormData.fromMap(map);
-                                        await dio.Dio()
-                                            .post(urlUpload, data: formData)
-                                            .then((value) async {
-                                          String urlImage =
-                                              'https://pea23.com/apipsinsx/uploadBeforDmsx/$nameFile';
-                                          print('##29jan --> $urlImage');
+                                      if (perCamera.isDenied) {
+                                        //Call Permision
 
-                                          String urlInsert =
-                                              'https://pea23.com/apipsinsx/insertDataBeforDmsx.php?isAdd=true&ca=${dmsxModels[indexDirection].ca}&image=$urlImage&userId=${dmsxModels[indexDirection].userId}';
+                                        MyDialog(context: context).normalDialot(
+                                            title: 'ปิดการใช้งานอยู่',
+                                            subTitle: 'OpenPermission',
+                                            firstButton: WidgetTextButton(
+                                              label: 'ไปเปิด Permission',
+                                              pressFunc: () {
+                                                navigator.pop();
+                                                openAppSettings();
+                                              },
+                                            ));
+                                      } else {
+                                        var result =
+                                            await ImagePicker().pickImage(
+                                          source: ImageSource.camera,
+                                          maxWidth: 800,
+                                          maxHeight: 800,
+                                        );
+
+                                        if (result != null) {
+                                          print('##18aug result not null');
+
+                                          File file = File(result.path);
+
+                                          String urlUpload =
+                                              'https://pea23.com/apipsinsx/saveFileBeforDmsx.php';
+                                          String nameFile =
+                                              '${dmsxModels[indexDirection].ca}_${dmsxModels[indexDirection].dataStatus}.jpg';
+                                          Map<String, dynamic> map = {};
+                                          map['file'] =
+                                              await dio.MultipartFile.fromFile(
+                                                  file.path,
+                                                  filename: nameFile);
+                                          dio.FormData formData =
+                                              dio.FormData.fromMap(map);
                                           await dio.Dio()
-                                              .get(urlInsert)
-                                              .then((value) {
-                                            Navigator.pop(context);
-                                            checkDisplayIconTakePhoto(
-                                                dmsxmodel:
-                                                    dmsxModels[indexDirection]);
+                                              .post(urlUpload, data: formData)
+                                              .then((value) async {
+                                            String urlImage =
+                                                'https://pea23.com/apipsinsx/uploadBeforDmsx/$nameFile';
+                                            print('##29jan --> $urlImage');
+
+                                            String urlInsert =
+                                                'https://pea23.com/apipsinsx/insertDataBeforDmsx.php?isAdd=true&ca=${dmsxModels[indexDirection].ca}&pea_on=${dmsxModels[indexDirection].peaNo}&image_name=$urlImage&user_id=${dmsxModels[indexDirection].userId}';
+
+                                            print(
+                                                '##18aug urlInsert ===> $urlInsert');
+
+                                            await dio.Dio()
+                                                .get(urlInsert)
+                                                .then((value) {
+                                              // Navigator.pop(context);
+
+                                              checkDisplayIconTakePhoto(
+                                                  dmsxmodel: dmsxModels[
+                                                      indexDirection]);
+                                            });
                                           });
-                                        });
+                                        }
                                       }
                                     },
                                   ));
@@ -992,8 +1014,10 @@ class _MapdmsxState extends State<Mapdmsx> {
                             String urlImage = value;
                             print('###5feb urlImage -->> $urlImage');
 
-                            String urlApi =
-                                'https://pea23.com/apipsinsx/editDmsxBeforWmmrWhereId.php?isAdd=true&id=${dmsxModels[indexDirection].id}&image_befor_wmmr=$urlImage';
+                            String urlApi = 'https://pea23.com/apipsinsx/insertBeforWmnr.php?isAdd=true&docId=${dmsxModels[indexDirection].docID}&ca=${dmsxModels[indexDirection].ca}&pea_on=${dmsxModels[indexDirection].peaNo}&image_name=$urlImage&image_date=${dmsxModels[indexDirection].dataStatus}&user_id=${dmsxModels[indexDirection].userId}';
+
+                            print('##18aug urlapi -----> $urlApi');
+
                             await dio.Dio().get(urlApi).then((value) {
                               readDataApi();
                               Navigator.pop(context);
@@ -1480,7 +1504,7 @@ class _MapdmsxState extends State<Mapdmsx> {
       await dio.Dio().get(apiEditImages).then((value) {
         print('value update == $value');
         readDataApi().then((value) {
-          takePhotoSpecial();
+          // takePhotoSpecial();
         });
       });
     });
@@ -1577,7 +1601,10 @@ class _MapdmsxState extends State<Mapdmsx> {
     print('##29jan currentDateTime $currentDateTime');
 
     String urlAPI =
-        'https://pea23.com/apipsinsx/getDmsxBeforImage.php?isAdd=true&dateStatus=$currentDateTime';
+        'https://pea23.com/apipsinsx/getDmsxBeforImage.php?isAdd=true&ca=${dmsxmodel.ca}';
+
+    print('##18aug urlAPI =======> $urlAPI');
+
     await dio.Dio().get(urlAPI).then((value) {
       if (value.toString() == 'null') {
         displayIconTakePhoto = true;

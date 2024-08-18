@@ -22,10 +22,10 @@ if (!$link->set_charset("utf8")) {
 if (isset($_GET)) {
 	if ($_GET['isAdd'] == 'true') {
 				
-		$ca = $_GET['ca'];
+		$userId = $_GET['user_id'];
 
 
-		$result = mysqli_query($link, "SELECT *, date(timestamp) FROM tb_saveFileBeforDmsx WHERE `ca` = $ca and date(timestamp) = curdate() ");
+		$result = mysqli_query($link, "SELECT *, date(timestamp) as import_date  FROM tb_work_import_dmsx_data WHERE `user_id` = $userId and date(timestamp) = curdate() ");
 
 		if ($result) {
 
