@@ -30,10 +30,8 @@ class _TakePhotoIdState extends State<TakePhotoId> {
           child: Column(
             children: [
               SizedBox(height: 20),
-
-               Text('กรุณาบันทึกภาพถ่ายบัตรประชาชน',
+              Text('กรุณาบันทึกภาพถ่ายบัตรประชาชน',
                   style: TextStyle(fontSize: 14)),
-              
               Text('คำแนะนำ : ให้ถ่ายภาพให้อยู่ในกรอบที่กำหนด',
                   style: TextStyle(fontSize: 14)),
               Container(
@@ -102,12 +100,15 @@ class _TakePhotoIdState extends State<TakePhotoId> {
     Map<String, dynamic> map = {};
     map['file'] = await MultipartFile.fromFile(file.path, filename: nameIdCard);
     FormData data = FormData.fromMap(map);
+
     await Dio().post(urlUpload, data: data).then((value) async {
       String urlIdCard = 'https://pea23.com/apipsinsx/imageIdCard/$nameIdCard';
       print('##26oct url Idcare $urlIdCard');
 
       String urlEdit =
           'https://pea23.com/apipsinsx/editStaffSurnameWhereId.php?isAdd=true&user_id=$id&staffsurname=$urlIdCard';
+
+      print('##18aug urlEdit ---> $urlEdit');
 
       await Dio().get(urlEdit).then((value) {
         Fluttertoast.showToast(

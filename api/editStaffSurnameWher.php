@@ -23,11 +23,15 @@ if (isset($_GET)) {
 	if ($_GET['isAdd'] == 'true') {
 			
 		$id = $_GET['user_id'];		
-		$staffsurname = $_GET['staffsurname'];
-		
+		$userEmail = $_GET['user_email'];
+		$userPhone = $_GET['user_phone'];
+		$userAddress = $_GET['user_adress'];
+		$userBankName = $_GET['user_bank_name'];
+		$userBankNumber = $_GET['user_bank_number'];
+		$userImg = $_GET['user_img'];
 		
 							
-		$sql = "UPDATE `tb_user` SET `staffsurname` = '$staffsurname' WHERE user_id = '$id'";
+		$sql = "UPDATE `tb_user` SET `user_email` = '$userEmail', `user_phone` = '$userPhone', `user_adress` = '$userAddress', `user_bank_name` = '$userBankName', `user_bank_number` = '$userBankNumber', `user_img` = '$userImg' WHERE user_id = '$id'";
 
 		$result = mysqli_query($link, $sql);
 
