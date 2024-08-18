@@ -636,7 +636,8 @@ class _MapdmsxState extends State<Mapdmsx> {
                                 pressFunc: () async {
                                   MyDialog(context: context).normalDialot(
                                     title: 'เลือกวิธีบันทึกบาร์โค้ด',
-                                    subTitle: 'กรุณาเลือกวิธีการบันทึก SerialNo',
+                                    subTitle:
+                                        'กรุณาเลือกวิธีการบันทึก SerialNo',
                                     firstButton: WidgetTextButton(
                                       label: 'แสกนบาร์โค้ด',
                                       pressFunc: () async {
@@ -766,38 +767,55 @@ class _MapdmsxState extends State<Mapdmsx> {
                       child: Text('นำทาง'),
                     ),
                     ElevatedButton(
-                      onPressed: () {
-                        double latDou =
-                            double.parse(dmsxModels[indexDirection].lat);
-                        double lngDou =
-                            double.parse(dmsxModels[indexDirection].lng);
+                      onPressed: () async {
+                        var permissionStorage = await Permission.storage.status;
 
-                        if (appController.positions.isNotEmpty) {
-                          Position position = appController.positions.last;
+                        if (permissionStorage.isDenied) {
+                          print('##18aug permissStro --> Deneied');
 
-                          print(
-                              '##6mar You Click Her latDou = $latDou lngDou = $lngDou');
+                          MyDialog(context: context).normalDialot(
+                              title: 'ปิดการใช้งานอยู่',
+                              subTitle: 'OpenPermission',
+                              firstButton: WidgetTextButton(
+                                label: 'ไปเปิด Permission',
+                                pressFunc: () {
+                                  navigator.pop();
+                                  openAppSettings();
+                                },
+                              ));
+                        } else {
+                          double latDou =
+                              double.parse(dmsxModels[indexDirection].lat);
+                          double lngDou =
+                              double.parse(dmsxModels[indexDirection].lng);
 
-                          print('##6mar posion= $position');
+                          if (appController.positions.isNotEmpty) {
+                            Position position = appController.positions.last;
 
-                          double distance = AppService().calculateDistance(
-                              position.latitude,
-                              position.longitude,
-                              latDou,
-                              lngDou);
+                            print(
+                                '##6mar You Click Her latDou = $latDou lngDou = $lngDou');
 
-                          print('##6mar distance= $distance');
+                            print('##6mar posion= $position');
 
-                          NumberFormat numberFormat =
-                              NumberFormat('##0.0#', 'en_US');
+                            double distance = AppService().calculateDistance(
+                                position.latitude,
+                                position.longitude,
+                                latDou,
+                                lngDou);
 
-                          String distanceStr = numberFormat.format(distance);
+                            print('##6mar distance= $distance');
 
-                          processTakePhoto(
-                              dmsxmodel: dmsxModels[indexDirection],
-                              source: ImageSource.gallery,
-                              distance: distanceStr,
-                              position: position);
+                            NumberFormat numberFormat =
+                                NumberFormat('##0.0#', 'en_US');
+
+                            String distanceStr = numberFormat.format(distance);
+
+                            processTakePhoto(
+                                dmsxmodel: dmsxModels[indexDirection],
+                                source: ImageSource.gallery,
+                                distance: distanceStr,
+                                position: position);
+                          }
                         }
                       },
                       child: ShowText(text: 'เลือกรูป'),
@@ -881,45 +899,47 @@ class _MapdmsxState extends State<Mapdmsx> {
     } else {
       //code readed true
       MyDialog(context: context).normalDialot(
-        title: 'SecurityNo : $result',
-        subTitle: '',
-        contentWidget: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            WidgetTextRich(head: 'ca', value: dmsxModels[indexDirection].ca),
-            WidgetTextRich(
-                head: 'ใบสั่ง', value: dmsxModels[indexDirection].notice),
-            WidgetTextRich(
-                head: 'pea', value: dmsxModels[indexDirection].peaNo),
-            WidgetTextRich(
-                head: 'ชื่อ', value: dmsxModels[indexDirection].cusName),
-          ],
-        ),
-        firstButton: WidgetTextButton(label: 'บันทึก', pressFunc: () async {
-          for (var element in json.decode(response.data)) {
-            SecurityModel model = SecurityModel.fromMap(element);
-            print('##31mar secutityModel readed --> ${model.toMap()}');
+          title: 'SecurityNo : $result',
+          subTitle: '',
+          contentWidget: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              WidgetTextRich(head: 'ca', value: dmsxModels[indexDirection].ca),
+              WidgetTextRich(
+                  head: 'ใบสั่ง', value: dmsxModels[indexDirection].notice),
+              WidgetTextRich(
+                  head: 'pea', value: dmsxModels[indexDirection].peaNo),
+              WidgetTextRich(
+                  head: 'ชื่อ', value: dmsxModels[indexDirection].cusName),
+            ],
+          ),
+          firstButton: WidgetTextButton(
+            label: 'บันทึก',
+            pressFunc: () async {
+              for (var element in json.decode(response.data)) {
+                SecurityModel model = SecurityModel.fromMap(element);
+                print('##31mar secutityModel readed --> ${model.toMap()}');
 
-            Map<String, dynamic> map = model.toMap();
-            map['notice'] = dmsxModels[indexDirection].notice;
-            map['ca'] = dmsxModels[indexDirection].ca;
-            map['pea_no'] = dmsxModels[indexDirection].peaNo;
-            map['user_id'] = dmsxModels[indexDirection].userId;
+                Map<String, dynamic> map = model.toMap();
+                map['notice'] = dmsxModels[indexDirection].notice;
+                map['ca'] = dmsxModels[indexDirection].ca;
+                map['pea_no'] = dmsxModels[indexDirection].peaNo;
+                map['user_id'] = dmsxModels[indexDirection].userId;
 
-            print('##31mar map ==> $map');
+                print('##31mar map ==> $map');
 
-            model = SecurityModel.fromMap(map);
+                model = SecurityModel.fromMap(map);
 
-            String urlApi = 'https://www.pea23.com/apipsinsx/editSecurityWhereSerialNo.php?isAdd=true&serial_no=${model.serial_no}&notice=${model.notice}&ca=${model.ca}&pea_no=${model.pea_no}&user_id=${model.user_id}';
-            await Dio().get(urlApi).then((value) {
-              Fluttertoast.showToast(msg: 'อัพเดทสำเร็จ');
-              Navigator.pop(context);
-            });
-
-          }
-        },)
-      );
+                String urlApi =
+                    'https://www.pea23.com/apipsinsx/editSecurityWhereSerialNo.php?isAdd=true&serial_no=${model.serial_no}&notice=${model.notice}&ca=${model.ca}&pea_no=${model.pea_no}&user_id=${model.user_id}';
+                await Dio().get(urlApi).then((value) {
+                  Fluttertoast.showToast(msg: 'อัพเดทสำเร็จ');
+                  Navigator.pop(context);
+                });
+              }
+            },
+          ));
     }
   }
 
